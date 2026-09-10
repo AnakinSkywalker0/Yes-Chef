@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9220d95878db61244af1076043cee72e, type: 3}
+  m_Name: Ingredient_Vegetable
+  m_EditorClassIdentifier: YesChef.Runtime::YesChef.Ingredients.IngredientSO
+  _displayName: Vegetable
+  _shortLabel: V
+  _scoreValue: 20
+  _requiredProcess: 1
+  _prefab: {fileID: 49524101086888916, guid: c9d70bcc7c0e3634d880f2da491e723f, type: 3}
+  _rawColor: {r: 0.16, g: 0.44, b: 0.18, a: 1}
+  _preparedColor: {r: 0.56, g: 0.86, b: 0.34, a: 1}
+  _rawScale: {x: 0.34, y: 0.34, z: 0.34}
+  _preparedScale: {x: 0.46, y: 0.13, z: 0.46}

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9220d95878db61244af1076043cee72e, type: 3}
+  m_Name: Ingredient_Meat
+  m_EditorClassIdentifier: YesChef.Runtime::YesChef.Ingredients.IngredientSO
+  _displayName: Meat
+  _shortLabel: M
+  _scoreValue: 30
+  _requiredProcess: 2
+  _prefab: {fileID: 8204538602487485329, guid: 92d622cb903efc943a5215b531f8c6bd, type: 3}
+  _rawColor: {r: 0.87, g: 0.38, b: 0.4, a: 1}
+  _preparedColor: {r: 0.4, g: 0.23, b: 0.13, a: 1}
+  _rawScale: {x: 0.4, y: 0.13, z: 0.4}
+  _preparedScale: {x: 0.37, y: 0.15, z: 0.37}
