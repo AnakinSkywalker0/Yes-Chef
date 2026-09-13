@@ -5,7 +5,7 @@ namespace YesChef.Ingredients
 {
     /// <summary>
     /// A live ingredient in the kitchen. Holds state only - every visual reaction lives in
-    /// <see cref="IngredientVisual"/> and is driven by <see cref="OnChanged"/>.
+    /// <see cref="IngredientStateVisual"/> and is driven by <see cref="OnChanged"/>.
     /// </summary>
     [DisallowMultipleComponent]
     public class Ingredient : MonoBehaviour

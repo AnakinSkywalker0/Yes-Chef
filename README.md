@@ -61,7 +61,7 @@ Assets/_Project/
 │   │                  KitchenCameraFitter, CameraDirector, CameraLeanTarget, OrderImpulseFeedback
 │   ├── Controls/      GameInput — the only file that references UnityEngine.InputSystem
 │   ├── Characters/    PlayerController (logic)  +  PlayerVisual (bob/squash)
-│   ├── Ingredients/   IngredientSO, Ingredient (logic)  +  IngredientVisual (colour/scale)
+│   ├── Ingredients/   IngredientSO, Ingredient (logic)  +  IngredientStateVisual (raw/prepared looks)
 │   ├── Stations/      BaseStation, the five station types, PreparationTimer,
 │   │                  StationSelectedVisual, StationFeedbackVisual
 │   ├── Orders/        Order, OrderGenerator (plain C#), OrderBoard
@@ -79,7 +79,8 @@ Assets/_Project/
 ### Key decisions
 
 **Ingredients are data, not code.** `IngredientSO` carries the score, the required
-preparation, the icon and both colour/scale pairs. Adding a fourth ingredient means creating
+preparation, the icon and the ticket colour; its prefab authors a raw look and a prepared
+look that `IngredientStateVisual` swaps on state change. Adding a fourth ingredient means creating
 one asset and dropping it into a refrigerator shelf and the order pool — no code changes,
 no switch statements to extend.
 
