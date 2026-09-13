@@ -12,8 +12,9 @@ namespace YesChef.Ingredients
     {
         [Header("Identity")]
         [SerializeField] private string _displayName = "Ingredient";
-        [Tooltip("One or two characters shown on order tickets.")]
+        [Tooltip("Fallback glyph for UI when no icon is assigned.")]
         [SerializeField] private string _shortLabel = "?";
+        [SerializeField] private Sprite _icon;
 
         [Header("Rules")]
         [SerializeField, Min(0)] private int _scoreValue = 10;
@@ -28,6 +29,7 @@ namespace YesChef.Ingredients
 
         public string DisplayName => _displayName;
         public string ShortLabel => _shortLabel;
+        public Sprite Icon => _icon;
         public int ScoreValue => _scoreValue;
         public IngredientProcess RequiredProcess => _requiredProcess;
         public Ingredient Prefab => _prefab;
@@ -43,5 +45,21 @@ namespace YesChef.Ingredients
 
         public Vector3 GetScale(IngredientState state) =>
             state == IngredientState.Prepared ? _preparedScale : _rawScale;
+
+        /// <summary>Human-readable state, e.g. "Raw" or "Chopped".</summary>
+        public string GetStateLabel(IngredientState state)
+        {
+            if (!NeedsPreparation)
+            {
+                return "Ready";
+            }
+
+            if (state == IngredientState.Raw)
+            {
+                return "Raw";
+            }
+
+            return _requiredProcess == IngredientProcess.Chop ? "Chopped" : "Cooked";
+        }
     }
 }

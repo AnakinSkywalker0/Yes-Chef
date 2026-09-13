@@ -17,6 +17,12 @@ namespace YesChef.UI
         [SerializeField] private Button _pauseButton;
         [SerializeField] private Button _quitButton;
 
+        [Header("Timer urgency")]
+        [Tooltip("Seconds remaining at which the clock turns urgent.")]
+        [SerializeField, Min(0f)] private float _urgentThreshold = 30f;
+        [SerializeField] private Color _timerColor = Color.white;
+        [SerializeField] private Color _urgentTimerColor = new(1f, 0.42f, 0.38f);
+
         private int _lastShownSeconds = -1;
 
         private void Start()
@@ -67,7 +73,8 @@ namespace YesChef.UI
                 return;
             }
 
-            int seconds = Mathf.CeilToInt(GameManager.Instance.TimeRemaining);
+            float remaining = GameManager.Instance.TimeRemaining;
+            int seconds = Mathf.CeilToInt(remaining);
             if (seconds == _lastShownSeconds)
             {
                 return;
@@ -75,6 +82,7 @@ namespace YesChef.UI
 
             _lastShownSeconds = seconds;
             _timerText.text = $"{seconds / 60:0}:{seconds % 60:00}";
+            _timerText.color = remaining <= _urgentThreshold ? _urgentTimerColor : _timerColor;
         }
 
         private void HandleScoreChanged(int score) => RefreshScoreTexts();

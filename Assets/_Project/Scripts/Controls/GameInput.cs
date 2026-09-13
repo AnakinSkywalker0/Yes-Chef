@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -108,6 +109,11 @@ namespace YesChef.Controls
             }
         }
 
+        /// <summary>One human-readable label per binding, composites collapsed (e.g. "W/A/S/D", "Left Stick").</summary>
+        public IReadOnlyList<string> GetMoveBindingLabels() => GetBindingLabels(_moveAction);
+        public IReadOnlyList<string> GetInteractBindingLabels() => GetBindingLabels(_interactAction);
+        public IReadOnlyList<string> GetPauseBindingLabels() => GetBindingLabels(_pauseAction);
+
         public string GetMoveDisplayString() => GetDisplayString(_moveAction);
         public string GetInteractDisplayString() => GetDisplayString(_interactAction);
         public string GetPauseDisplayString() => GetDisplayString(_pauseAction);
@@ -118,5 +124,32 @@ namespace YesChef.Controls
 
         private static string GetDisplayString(InputAction action) =>
             action == null ? "-" : action.GetBindingDisplayString();
+
+        private static IReadOnlyList<string> GetBindingLabels(InputAction action)
+        {
+            var labels = new List<string>();
+            if (action == null)
+            {
+                return labels;
+            }
+
+            var bindings = action.bindings;
+            for (int i = 0; i < bindings.Count; i++)
+            {
+                // Composite parts are folded into their parent's display string.
+                if (bindings[i].isPartOfComposite)
+                {
+                    continue;
+                }
+
+                string label = action.GetBindingDisplayString(i);
+                if (!string.IsNullOrWhiteSpace(label))
+                {
+                    labels.Add(label);
+                }
+            }
+
+            return labels;
+        }
     }
 }

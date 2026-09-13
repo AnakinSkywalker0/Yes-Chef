@@ -46,6 +46,9 @@ namespace YesChef.Characters
         /// <summary>Raised when the aimed-at station changes, including to null.</summary>
         public event Action<BaseStation> OnSelectedStationChanged;
 
+        /// <summary>Raised when the chef picks something up or their hands empty (null).</summary>
+        public event Action<Ingredient> OnHeldIngredientChanged;
+
         public BaseStation SelectedStation { get; private set; }
         public bool IsMoving { get; private set; }
 
@@ -53,9 +56,17 @@ namespace YesChef.Characters
         public Ingredient HeldIngredient { get; private set; }
         public bool HasIngredient => HeldIngredient != null;
 
-        void IIngredientHolder.SetIngredient(Ingredient ingredient) => HeldIngredient = ingredient;
+        void IIngredientHolder.SetIngredient(Ingredient ingredient)
+        {
+            HeldIngredient = ingredient;
+            OnHeldIngredientChanged?.Invoke(ingredient);
+        }
 
-        void IIngredientHolder.ClearIngredient() => HeldIngredient = null;
+        void IIngredientHolder.ClearIngredient()
+        {
+            HeldIngredient = null;
+            OnHeldIngredientChanged?.Invoke(null);
+        }
 
         private void Awake()
         {

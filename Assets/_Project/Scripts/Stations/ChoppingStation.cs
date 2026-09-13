@@ -18,13 +18,20 @@ namespace YesChef.Stations
         [SerializeField] private Transform _ingredientAnchor;
         [SerializeField, Min(0.05f)] private float _chopDuration = 2f;
 
-        private float _elapsed;
+        private PreparationTimer _timer;
 
-        public event Action OnProgressChanged;
+        // Created lazily so a progress bar subscribing in its OnEnable never races our Awake.
+        private PreparationTimer Timer => _timer ??= new PreparationTimer(_chopDuration);
 
-        public bool IsChopping { get; private set; }
-        public bool IsInProgress => IsChopping;
-        public float Progress { get; private set; }
+        public event Action OnProgressChanged
+        {
+            add => Timer.OnChanged += value;
+            remove => Timer.OnChanged -= value;
+        }
+
+        public bool IsChopping => Timer.IsRunning;
+        public bool IsInProgress => Timer.IsRunning;
+        public float Progress => Timer.Progress;
 
         public Transform IngredientAnchor => _ingredientAnchor;
         public Ingredient HeldIngredient { get; private set; }
@@ -35,7 +42,7 @@ namespace YesChef.Stations
         void IIngredientHolder.ClearIngredient()
         {
             HeldIngredient = null;
-            CancelChopping();
+            Timer.Cancel();
         }
 
         public override void Interact(PlayerController player)
@@ -56,42 +63,28 @@ namespace YesChef.Stations
             TryCollectIngredient(player);
         }
 
-        private void Update()
+        // Time.deltaTime is zero while the game is paused, so this freezes for free.
+        private void Update() => Advance(Time.deltaTime);
+
+        /// <summary>Advances the chop. Exposed to tests so the rules can be checked without frames.</summary>
+        internal void Advance(float deltaTime)
         {
-            if (!IsChopping)
+            if (Timer.Tick(deltaTime) && HeldIngredient != null)
             {
-                return;
+                HeldIngredient.MarkPrepared();
             }
-
-            // Time.deltaTime is zero while the game is paused, so this freezes for free.
-            _elapsed += Time.deltaTime;
-            SetProgress(Mathf.Clamp01(_elapsed / _chopDuration));
-
-            if (_elapsed < _chopDuration)
-            {
-                return;
-            }
-
-            CompleteChopping();
         }
 
         private void TryPlaceIngredient(PlayerController player)
         {
-            if (HasIngredient)
+            if (HasIngredient || !CanChop(player.HeldIngredient))
             {
                 RaiseRejected();
                 return;
             }
 
-            Ingredient candidate = player.HeldIngredient;
-            if (!CanChop(candidate))
-            {
-                RaiseRejected();
-                return;
-            }
-
-            candidate.SetHolder(this);
-            BeginChopping();
+            player.HeldIngredient.SetHolder(this);
+            Timer.Start();
             RaiseInteracted();
         }
 
@@ -112,41 +105,5 @@ namespace YesChef.Stations
             && ingredient.Definition != null
             && ingredient.Definition.RequiredProcess == IngredientProcess.Chop
             && ingredient.State == IngredientState.Raw;
-
-        private void BeginChopping()
-        {
-            _elapsed = 0f;
-            IsChopping = true;
-            SetProgress(0f, forceNotify: true);
-        }
-
-        private void CompleteChopping()
-        {
-            IsChopping = false;
-            HeldIngredient.MarkPrepared();
-            SetProgress(0f, forceNotify: true);
-        }
-
-        private void CancelChopping()
-        {
-            if (!IsChopping)
-            {
-                return;
-            }
-
-            IsChopping = false;
-            SetProgress(0f, forceNotify: true);
-        }
-
-        private void SetProgress(float value, bool forceNotify = false)
-        {
-            if (!forceNotify && Mathf.Approximately(Progress, value))
-            {
-                return;
-            }
-
-            Progress = value;
-            OnProgressChanged?.Invoke();
-        }
     }
 }

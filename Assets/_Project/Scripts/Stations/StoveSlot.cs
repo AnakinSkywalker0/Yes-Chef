@@ -17,13 +17,19 @@ namespace YesChef.Stations
         [SerializeField] private Transform _ingredientAnchor;
         [SerializeField, Min(0.05f)] private float _cookDuration = 6f;
 
-        private float _elapsed;
+        private PreparationTimer _timer;
 
-        public event Action OnProgressChanged;
+        private PreparationTimer Timer => _timer ??= new PreparationTimer(_cookDuration);
 
-        public bool IsCooking { get; private set; }
-        public bool IsInProgress => IsCooking;
-        public float Progress { get; private set; }
+        public event Action OnProgressChanged
+        {
+            add => Timer.OnChanged += value;
+            remove => Timer.OnChanged -= value;
+        }
+
+        public bool IsCooking => Timer.IsRunning;
+        public bool IsInProgress => Timer.IsRunning;
+        public float Progress => Timer.Progress;
 
         public Transform IngredientAnchor => _ingredientAnchor;
         public Ingredient HeldIngredient { get; private set; }
@@ -40,7 +46,7 @@ namespace YesChef.Stations
         void IIngredientHolder.ClearIngredient()
         {
             HeldIngredient = null;
-            CancelCooking();
+            Timer.Cancel();
         }
 
         public void BeginCooking()
@@ -51,56 +57,18 @@ namespace YesChef.Stations
                 return;
             }
 
-            _elapsed = 0f;
-            IsCooking = true;
-            SetProgress(0f, forceNotify: true);
+            Timer.Start();
         }
 
-        private void Update()
+        private void Update() => Advance(Time.deltaTime);
+
+        /// <summary>Advances the cook. Exposed to tests so the rules can be checked without frames.</summary>
+        internal void Advance(float deltaTime)
         {
-            if (!IsCooking)
+            if (Timer.Tick(deltaTime) && HeldIngredient != null)
             {
-                return;
+                HeldIngredient.MarkPrepared();
             }
-
-            _elapsed += Time.deltaTime;
-            SetProgress(Mathf.Clamp01(_elapsed / _cookDuration));
-
-            if (_elapsed < _cookDuration)
-            {
-                return;
-            }
-
-            CompleteCooking();
-        }
-
-        private void CompleteCooking()
-        {
-            IsCooking = false;
-            HeldIngredient.MarkPrepared();
-            SetProgress(0f, forceNotify: true);
-        }
-
-        private void CancelCooking()
-        {
-            if (!IsCooking)
-            {
-                return;
-            }
-
-            IsCooking = false;
-            SetProgress(0f, forceNotify: true);
-        }
-
-        private void SetProgress(float value, bool forceNotify = false)
-        {
-            if (!forceNotify && Mathf.Approximately(Progress, value))
-            {
-                return;
-            }
-
-            Progress = value;
-            OnProgressChanged?.Invoke();
         }
     }
 }
