@@ -5,17 +5,22 @@ using YesChef.Ingredients;
 
 namespace YesChef.UI
 {
-    /// <summary>One requirement on an order ticket: a colour swatch, a label and a tick.</summary>
+    /// <summary>
+    /// One requirement on an order ticket: the ingredient's icon on a tinted tile, dimmed
+    /// with a tick once delivered. Falls back to the short label if an icon is missing.
+    /// </summary>
     [DisallowMultipleComponent]
     public class OrderIngredientIconUI : MonoBehaviour
     {
         [SerializeField] private GameObject _root;
-        [SerializeField] private Image _swatch;
-        [SerializeField] private TMP_Text _label;
+        [SerializeField] private Image _tile;
+        [SerializeField] private Image _icon;
+        [SerializeField] private TMP_Text _fallbackLabel;
         [SerializeField] private GameObject _deliveredTick;
 
-        [Tooltip("How far a delivered swatch is dimmed towards black.")]
-        [SerializeField, Range(0f, 1f)] private float _deliveredDim = 0.4f;
+        [Header("Delivered look")]
+        [SerializeField, Range(0f, 1f)] private float _deliveredTileAlpha = 0.25f;
+        [SerializeField, Range(0f, 1f)] private float _deliveredIconAlpha = 0.35f;
 
         public void Show(IngredientSO ingredient, bool delivered)
         {
@@ -29,15 +34,26 @@ namespace YesChef.UI
                 return;
             }
 
-            if (_swatch != null)
+            if (_tile != null)
             {
-                Color color = ingredient.TicketColor;
-                _swatch.color = delivered ? Color.Lerp(Color.black, color, _deliveredDim) : color;
+                Color tint = ingredient.TicketColor;
+                tint.a = delivered ? _deliveredTileAlpha : 0.9f;
+                _tile.color = tint;
             }
 
-            if (_label != null)
+            bool hasIcon = ingredient.Icon != null;
+
+            if (_icon != null)
             {
-                _label.text = ingredient.ShortLabel;
+                _icon.gameObject.SetActive(hasIcon);
+                _icon.sprite = ingredient.Icon;
+                _icon.color = new Color(1f, 1f, 1f, delivered ? _deliveredIconAlpha : 1f);
+            }
+
+            if (_fallbackLabel != null)
+            {
+                _fallbackLabel.gameObject.SetActive(!hasIcon);
+                _fallbackLabel.text = ingredient.ShortLabel;
             }
 
             if (_deliveredTick != null)

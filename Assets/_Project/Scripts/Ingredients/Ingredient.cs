@@ -40,6 +40,13 @@ namespace YesChef.Ingredients
                 return null;
             }
 
+            // Refuse before instantiating so a full holder never leaves an orphan behind.
+            if (holder != null && holder.HasIngredient)
+            {
+                Debug.LogError($"Cannot spawn '{definition.DisplayName}': the holder is already occupied.");
+                return null;
+            }
+
             Ingredient instance = Instantiate(definition.Prefab);
             instance.Initialise(definition);
             instance.SetHolder(holder);
@@ -98,7 +105,15 @@ namespace YesChef.Ingredients
         {
             _holder?.ClearIngredient();
             _holder = null;
-            Destroy(gameObject);
+
+            if (Application.isPlaying)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                DestroyImmediate(gameObject);
+            }
         }
     }
 }

@@ -1,19 +1,21 @@
+using Unity.Cinemachine;
 using UnityEngine;
 
 namespace YesChef.Core
 {
     /// <summary>
-    /// Widens the fixed overhead camera until the whole kitchen fits the frame.
+    /// Widens a Cinemachine camera's lens until the whole kitchen fits the frame.
     /// <para>
-    /// The design requires the entire kitchen to be visible and the camera never to move,
-    /// but a hard-coded field of view only holds for one aspect ratio. This measures the
-    /// kitchen's bounding box in camera space and derives the vertical FOV that contains
-    /// it, so the framing survives any window shape or resolution.
+    /// The design requires the entire kitchen to be visible, but a hard-coded field of view
+    /// only holds for one aspect ratio and one camera pose. This measures the kitchen's
+    /// bounding box from wherever the camera currently is and derives the vertical FOV that
+    /// contains it, so the guarantee survives window resizes, Cinemachine blends and the
+    /// small follow offsets the gameplay camera makes.
     /// </para>
     /// </summary>
     [ExecuteAlways]
     [DisallowMultipleComponent]
-    [RequireComponent(typeof(Camera))]
+    [RequireComponent(typeof(CinemachineCamera))]
     public class KitchenCameraFitter : MonoBehaviour
     {
         [Header("Area to keep in frame")]
@@ -22,51 +24,37 @@ namespace YesChef.Core
 
         [Header("Framing")]
         [Tooltip("Extra breathing room around the kitchen, as a fraction of the frame.")]
-        [SerializeField, Range(0f, 0.4f)] private float _padding = 0.05f;
+        [SerializeField, Range(0f, 0.4f)] private float _padding = 0.07f;
         [SerializeField, Range(5f, 120f)] private float _minFieldOfView = 20f;
         [SerializeField, Range(5f, 179f)] private float _maxFieldOfView = 90f;
 
-        private Camera _camera;
-        private float _lastAspect = -1f;
+        private CinemachineCamera _virtualCamera;
 
-        private void Awake() => _camera = GetComponent<Camera>();
+        private void Awake() => _virtualCamera = GetComponent<CinemachineCamera>();
 
         private void OnEnable()
         {
-            _camera = GetComponent<Camera>();
+            _virtualCamera = GetComponent<CinemachineCamera>();
             Fit();
         }
 
-        private void LateUpdate()
-        {
-            if (_camera == null)
-            {
-                return;
-            }
-
-            // Re-fit only when the viewport shape actually changes.
-            if (Mathf.Approximately(_camera.aspect, _lastAspect))
-            {
-                return;
-            }
-
-            Fit();
-        }
+        private void LateUpdate() => Fit();
 
         private void Fit()
         {
-            if (_camera == null || _camera.orthographic)
+            if (_virtualCamera == null)
             {
                 return;
             }
 
-            _lastAspect = _camera.aspect;
+            Camera output = Camera.main;
+            float aspect = output != null ? Mathf.Max(0.1f, output.aspect) : 16f / 9f;
 
             Vector3 extents = _areaSize * 0.5f;
             float tanVertical = 0f;
             float tanHorizontal = 0f;
 
-            // Walk the eight corners of the kitchen volume in camera space.
+            // Walk the eight corners of the kitchen volume in this camera's space.
             for (int corner = 0; corner < 8; corner++)
             {
                 var offset = new Vector3(
@@ -91,13 +79,18 @@ namespace YesChef.Core
                 return;
             }
 
-            float aspect = Mathf.Max(0.1f, _camera.aspect);
             float requiredTanHalfFov = Mathf.Max(tanVertical, tanHorizontal / aspect) * (1f + _padding);
-
-            _camera.fieldOfView = Mathf.Clamp(
+            float fieldOfView = Mathf.Clamp(
                 2f * Mathf.Atan(requiredTanHalfFov) * Mathf.Rad2Deg,
                 _minFieldOfView,
                 _maxFieldOfView);
+
+            if (Mathf.Approximately(_virtualCamera.Lens.FieldOfView, fieldOfView))
+            {
+                return;
+            }
+
+            _virtualCamera.Lens.FieldOfView = fieldOfView;
         }
     }
 }
