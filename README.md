@@ -12,9 +12,10 @@ Open `Assets/_Project/Scenes/Kitchen.unity` and press Play.
 
 ## The game
 
-You run a one-man kitchen for three minutes. Four customer windows each show an order;
-fetch raw ingredients from the refrigerators, prepare them at the right station, and hand
-them over before the order goes stale.
+You run a one-man kitchen for three minutes. Four customer windows along the back wall
+each show an order; fetch raw ingredients from the refrigerators along the front wall,
+prepare them at the island in the middle (stoves face the windows, chopping tables face
+the fridges), and hand them over before the order goes stale.
 
 | Ingredient | Preparation | Value |
 |---|---|---|
@@ -22,9 +23,14 @@ them over before the order goes stale.
 | Cheese | None — deliver as-is | 10 |
 | Meat | Cook on a stove (6s) | 30 |
 
-An order scores **the sum of its ingredient values minus one point per whole second it has
-been open**. Time is floored, so a 14.99-second delivery only costs 14 points, and a slow
-order can finish negative. Windows refill five seconds after being cleared.
+An order is worth **the sum of its ingredient values**. Customers wait patiently for a
+**25-second grace period**; after that the order loses **one point per whole second** it
+stays open (time is floored, so 14.99 overdue seconds only cost 14 points) and a slow order
+can finish negative. Windows refill five seconds after being cleared.
+
+Deliver inside the grace period to build a **combo**: the first on-time order pays x1, the
+next x2, then x3 (the cap). One late delivery drops the multiplier straight back to x1, and
+that late order is never multiplied - so a penalty is never made worse by a streak.
 
 ### Controls
 
@@ -65,7 +71,8 @@ Assets/_Project/
 │   ├── Stations/      BaseStation, the five station types, PreparationTimer,
 │   │                  StationSelectedVisual, StationFeedbackVisual
 │   ├── Orders/        Order, OrderGenerator (plain C#), OrderBoard
-│   ├── Scoring/       ScoreManager, IHighScoreRepository, PlayerPrefsHighScoreRepository
+│   ├── Scoring/       ScoreManager, ComboTracker + ScoreAward (plain C#),
+│   │                  IHighScoreRepository, PlayerPrefsHighScoreRepository
 │   └── UI/            Main menu + briefing, HUD, pause, game over,
 │                      world-space tickets and progress bars, controls list
 ├── Tests/EditMode/    54 tests: scoring, order generation, the preparation timer,

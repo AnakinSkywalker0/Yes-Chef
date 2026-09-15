@@ -18,7 +18,7 @@ namespace YesChef.Orders
         private readonly IngredientSO[] _requirements;
         private readonly bool[] _delivered;
 
-        public Order(IReadOnlyList<IngredientSO> requirements, float startTime)
+        public Order(IReadOnlyList<IngredientSO> requirements, float startTime, float graceSeconds = 0f)
         {
             if (requirements == null || requirements.Count == 0)
             {
@@ -36,11 +36,18 @@ namespace YesChef.Orders
 
             _delivered = new bool[_requirements.Length];
             StartTime = startTime;
+            GraceSeconds = Mathf.Max(0f, graceSeconds);
             BaseScore = total;
         }
 
         /// <summary>Scaled game time at which this order appeared.</summary>
         public float StartTime { get; }
+
+        /// <summary>
+        /// Seconds the customer waits patiently before points start dropping. Delivering
+        /// inside this window is what keeps a combo streak alive.
+        /// </summary>
+        public float GraceSeconds { get; }
 
         /// <summary>Sum of the ingredient values, before the time penalty.</summary>
         public int BaseScore { get; }
@@ -79,11 +86,22 @@ namespace YesChef.Orders
 
         public float GetElapsedSeconds(float now) => Mathf.Max(0f, now - StartTime);
 
+        /// <summary>Seconds of grace left before the penalty starts. Zero once it has begun.</summary>
+        public float GetGraceRemaining(float now) => Mathf.Max(0f, GraceSeconds - GetElapsedSeconds(now));
+
+        /// <summary>True while the order is still worth its full base score.</summary>
+        public bool IsWithinGrace(float now) => GetElapsedSeconds(now) < GraceSeconds;
+
         /// <summary>
-        /// Ingredient values minus one point per whole second the order has been open.
-        /// Time is floored, so 14.99s of service only costs 14 points. May go negative.
+        /// Ingredient values minus one point per whole second the order has been open beyond
+        /// its grace period. Time is floored, so 14.99s of penalty only costs 14 points.
+        /// May go negative.
         /// </summary>
-        public int CalculateScore(float now) => BaseScore - Mathf.FloorToInt(GetElapsedSeconds(now));
+        public int CalculateScore(float now)
+        {
+            float overdue = Mathf.Max(0f, GetElapsedSeconds(now) - GraceSeconds);
+            return BaseScore - Mathf.FloorToInt(overdue);
+        }
 
         private bool AllDelivered()
         {

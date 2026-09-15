@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using YesChef.Orders;
+using YesChef.Scoring;
 using YesChef.Stations;
 
 namespace YesChef.UI
@@ -28,6 +29,9 @@ namespace YesChef.UI
         [SerializeField] private ScorePopupUI _scorePopup;
 
         [Header("Value colours")]
+        [Tooltip("Timer colour while the customer is still waiting patiently.")]
+        [SerializeField] private Color _graceColor = new(0.6f, 0.95f, 0.7f);
+        [SerializeField] private Color _timerColor = Color.white;
         [SerializeField] private Color _positiveColor = new(0.85f, 0.95f, 0.6f);
         [SerializeField] private Color _negativeColor = new(1f, 0.45f, 0.42f);
 
@@ -38,7 +42,11 @@ namespace YesChef.UI
             if (_window != null)
             {
                 _window.OnOrderChanged += HandleOrderChanged;
-                _window.OnOrderCompleted += HandleOrderCompleted;
+            }
+
+            if (ScoreManager.Instance != null)
+            {
+                ScoreManager.Instance.OnOrderAwarded += HandleOrderAwarded;
             }
 
             Refresh();
@@ -46,13 +54,15 @@ namespace YesChef.UI
 
         private void OnDestroy()
         {
-            if (_window == null)
+            if (_window != null)
             {
-                return;
+                _window.OnOrderChanged -= HandleOrderChanged;
             }
 
-            _window.OnOrderChanged -= HandleOrderChanged;
-            _window.OnOrderCompleted -= HandleOrderCompleted;
+            if (ScoreManager.Instance != null)
+            {
+                ScoreManager.Instance.OnOrderAwarded -= HandleOrderAwarded;
+            }
         }
 
         private void Update()
@@ -75,7 +85,12 @@ namespace YesChef.UI
 
             if (_timerText != null)
             {
-                _timerText.text = $"{seconds}s";
+                // Count the grace down so the player can see how long the streak is safe,
+                // then count the overdue time up so the penalty is legible.
+                bool inGrace = order.IsWithinGrace(Time.time);
+                int shown = inGrace ? Mathf.CeilToInt(order.GetGraceRemaining(Time.time)) : seconds;
+                _timerText.text = $"{shown}s";
+                _timerText.color = inGrace ? _graceColor : _timerColor;
             }
 
             if (_valueText == null)
@@ -90,11 +105,11 @@ namespace YesChef.UI
 
         private void HandleOrderChanged(CustomerWindowStation window) => Refresh();
 
-        private void HandleOrderCompleted(CustomerWindowStation window, Order order, int awardedPoints)
+        private void HandleOrderAwarded(CustomerWindowStation window, ScoreAward award)
         {
-            if (_scorePopup != null)
+            if (window == _window && _scorePopup != null)
             {
-                _scorePopup.Show(awardedPoints);
+                _scorePopup.Show(award);
             }
         }
 
