@@ -40,6 +40,10 @@ that late order is never multiplied - so a penalty is never made worse by a stre
 | `E` or `Space` | South button | Use the station you are facing |
 | `Esc` | Start | Pause |
 
+On phones and tablets a virtual stick and a **USE** button appear during service. They are
+Input System on-screen controls that emulate a gamepad, so the gamepad bindings above drive
+them and no gameplay code knows the input came from a thumb.
+
 The briefing screen renders these straight from the bound Input System actions, so
 rebinding `Assets/_Project/Input/KitchenControls.inputactions` updates the UI automatically.
 
