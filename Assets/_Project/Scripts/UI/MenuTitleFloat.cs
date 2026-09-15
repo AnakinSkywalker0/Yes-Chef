@@ -2,7 +2,14 @@ using UnityEngine;
 
 namespace YesChef.UI
 {
-    /// <summary>A slow bob and tilt for the title so the menu never looks frozen.</summary>
+    /// <summary>
+    /// A slow bob and tilt for the title so the menu never looks frozen.
+    /// <para>
+    /// Must sit on an element that is <em>not</em> positioned by a layout group (put it on a
+    /// child of the layout-controlled holder instead): it drives the anchored position every
+    /// frame, and a layout group would fight it and win.
+    /// </para>
+    /// </summary>
     [DisallowMultipleComponent]
     public class MenuTitleFloat : MonoBehaviour
     {
@@ -13,7 +20,7 @@ namespace YesChef.UI
         private RectTransform _rect;
         private Vector2 _restPosition;
 
-        private void Awake()
+        private void OnEnable()
         {
             _rect = transform as RectTransform;
             _restPosition = _rect != null ? _rect.anchoredPosition : Vector2.zero;
