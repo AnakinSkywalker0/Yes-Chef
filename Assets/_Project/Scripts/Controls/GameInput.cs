@@ -33,6 +33,12 @@ namespace YesChef.Controls
         /// <summary>Normalised movement on the kitchen floor plane.</summary>
         public Vector2 MoveInput => _moveAction != null ? _moveAction.ReadValue<Vector2>() : Vector2.zero;
 
+        /// <summary>
+        /// True when the player is most likely holding a phone or tablet: a mobile build, or
+        /// any platform that reports a touchscreen. Drives whether on-screen controls appear.
+        /// </summary>
+        public static bool IsTouchDevice => Application.isMobilePlatform || Touchscreen.current != null;
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
