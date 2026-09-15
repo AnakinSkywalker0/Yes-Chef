@@ -1,12 +1,14 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using YesChef.Scoring;
 
 namespace YesChef.UI
 {
     /// <summary>
     /// The "+17" that floats up and fades away beside a window when an order is settled.
-    /// Negative awards are shown in red so a slow delivery reads as a punishment.
+    /// Negative awards are shown in red so a slow delivery reads as a punishment, and a
+    /// multiplied award shows the multiplier so the combo feels like it is paying out.
     /// </summary>
     [DisallowMultipleComponent]
     public class ScorePopupUI : MonoBehaviour
@@ -19,6 +21,7 @@ namespace YesChef.UI
         [SerializeField] private float _riseDistance = 40f;
         [SerializeField] private Color _positiveColor = new(0.5f, 1f, 0.55f);
         [SerializeField] private Color _negativeColor = new(1f, 0.45f, 0.42f);
+        [SerializeField] private Color _comboColor = new(1f, 0.85f, 0.35f);
 
         private Vector3 _restLocalPosition;
         private Coroutine _routine;
@@ -33,15 +36,29 @@ namespace YesChef.UI
             }
         }
 
-        public void Show(int points)
+        public void Show(ScoreAward award)
+        {
+            int points = award.Points;
+            string label = points >= 0 ? $"+{points}" : points.ToString();
+
+            if (award.Multiplier > ComboTracker.MinMultiplier)
+            {
+                Show($"{label}  x{award.Multiplier}", _comboColor);
+                return;
+            }
+
+            Show(label, points >= 0 ? _positiveColor : _negativeColor);
+        }
+
+        private void Show(string label, Color color)
         {
             if (_text == null || _canvasGroup == null)
             {
                 return;
             }
 
-            _text.text = points >= 0 ? $"+{points}" : points.ToString();
-            _text.color = points >= 0 ? _positiveColor : _negativeColor;
+            _text.text = label;
+            _text.color = color;
 
             if (_routine != null)
             {

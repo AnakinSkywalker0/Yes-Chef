@@ -64,6 +64,17 @@ namespace YesChef.Tests
         }
 
         [Test]
+        public void Create_StampsOrdersWithTheConfiguredGrace()
+        {
+            var generator = new OrderGenerator(_pool, graceSeconds: 25f);
+
+            Order order = generator.Create(startTime: 0f);
+
+            Assert.AreEqual(25f, order.GraceSeconds);
+            Assert.IsTrue(order.IsWithinGrace(now: 24f));
+        }
+
+        [Test]
         public void Create_ProducesBothOrderSizes()
         {
             var generator = new OrderGenerator(_pool);
