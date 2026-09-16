@@ -16,9 +16,8 @@ namespace YesChef.Orders
         private const int LargeOrderSize = 3;
 
         private readonly IReadOnlyList<IngredientSO> _pool;
-        private readonly float _graceSeconds;
 
-        public OrderGenerator(IReadOnlyList<IngredientSO> pool, float graceSeconds = 0f)
+        public OrderGenerator(IReadOnlyList<IngredientSO> pool)
         {
             if (pool == null || pool.Count == 0)
             {
@@ -26,7 +25,6 @@ namespace YesChef.Orders
             }
 
             _pool = pool;
-            _graceSeconds = graceSeconds;
         }
 
         public Order Create(float startTime)
@@ -39,7 +37,7 @@ namespace YesChef.Orders
                 requirements[i] = _pool[Random.Range(0, _pool.Count)];
             }
 
-            return new Order(requirements, startTime, _graceSeconds);
+            return new Order(requirements, startTime);
         }
     }
 }

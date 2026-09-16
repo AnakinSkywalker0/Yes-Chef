@@ -9,8 +9,7 @@ namespace YesChef.Orders
 {
     /// <summary>
     /// Keeps the customer windows stocked. Windows own their order; the board owns the
-    /// rules about when a new one appears and how patient the customers are, and funnels
-    /// completions from every window into a single signal for the scorer.
+    /// rules about when a new one appears and turns completions into a score signal.
     /// </summary>
     public class OrderBoard : MonoBehaviour
     {
@@ -22,21 +21,13 @@ namespace YesChef.Orders
         [Tooltip("Seconds an empty window waits before a new order appears.")]
         [SerializeField, Min(0f)] private float _respawnDelay = 5f;
 
-        [Tooltip("Seconds a customer waits at full value before the order starts losing points. " +
-                 "Delivering inside this window keeps the combo streak alive.")]
-        [SerializeField, Min(0f)] private float _gracePeriod = 25f;
-
         private readonly List<PendingOrder> _pendingOrders = new();
         private OrderGenerator _generator;
 
-        /// <summary>
-        /// Raised when any window completes its order, carrying the order and the points it
-        /// was worth on its own. Combo multipliers are applied downstream by the scorer.
-        /// </summary>
-        public event Action<CustomerWindowStation, Order, int> OnOrderCompleted;
+        /// <summary>Raised when an order is completed, carrying the points it was worth.</summary>
+        public event Action<CustomerWindowStation, int> OnOrderScored;
 
         public IReadOnlyList<CustomerWindowStation> Windows => _windows;
-        public float GracePeriod => _gracePeriod;
 
         private struct PendingOrder
         {
@@ -44,7 +35,7 @@ namespace YesChef.Orders
             public float TimeRemaining;
         }
 
-        private void Awake() => _generator = new OrderGenerator(_ingredientPool, _gracePeriod);
+        private void Awake() => _generator = new OrderGenerator(_ingredientPool);
 
         private void Start()
         {
@@ -136,9 +127,9 @@ namespace YesChef.Orders
             }
         }
 
-        private void HandleOrderCompleted(CustomerWindowStation window, Order order, int rawPoints)
+        private void HandleOrderCompleted(CustomerWindowStation window, Order order, int awardedPoints)
         {
-            OnOrderCompleted?.Invoke(window, order, rawPoints);
+            OnOrderScored?.Invoke(window, awardedPoints);
 
             _pendingOrders.Add(new PendingOrder
             {

@@ -6,22 +6,16 @@ using YesChef.Scoring;
 
 namespace YesChef.UI
 {
-    /// <summary>Always-on readouts: score, combo multiplier, high score, remaining time, pause and quit.</summary>
+    /// <summary>Always-on readouts: score, high score, remaining time, pause and quit.</summary>
     [DisallowMultipleComponent]
     public class GameHudUI : MonoBehaviour
     {
         [SerializeField] private GameObject _hudRoot;
         [SerializeField] private TMP_Text _scoreText;
         [SerializeField] private TMP_Text _highScoreText;
-        [SerializeField] private TMP_Text _multiplierText;
         [SerializeField] private TMP_Text _timerText;
         [SerializeField] private Button _pauseButton;
         [SerializeField] private Button _quitButton;
-
-        [Header("Combo")]
-        [SerializeField] private Color _idleMultiplierColor = new(1f, 1f, 1f, 0.45f);
-        [SerializeField] private Color _activeMultiplierColor = new(1f, 0.85f, 0.35f);
-        [SerializeField] private Color _maxMultiplierColor = new(1f, 0.55f, 0.25f);
 
         [Header("Timer urgency")]
         [Tooltip("Seconds remaining at which the clock turns urgent.")]
@@ -47,7 +41,6 @@ namespace YesChef.UI
             {
                 ScoreManager.Instance.OnScoreChanged += HandleScoreChanged;
                 ScoreManager.Instance.OnHighScoreChanged += HandleHighScoreChanged;
-                ScoreManager.Instance.OnMultiplierChanged += HandleMultiplierChanged;
             }
 
             if (GameManager.Instance != null)
@@ -56,7 +49,6 @@ namespace YesChef.UI
             }
 
             RefreshScoreTexts();
-            RefreshMultiplierText();
             RefreshVisibility();
         }
 
@@ -66,7 +58,6 @@ namespace YesChef.UI
             {
                 ScoreManager.Instance.OnScoreChanged -= HandleScoreChanged;
                 ScoreManager.Instance.OnHighScoreChanged -= HandleHighScoreChanged;
-                ScoreManager.Instance.OnMultiplierChanged -= HandleMultiplierChanged;
             }
 
             if (GameManager.Instance != null)
@@ -98,8 +89,6 @@ namespace YesChef.UI
 
         private void HandleHighScoreChanged(int highScore) => RefreshScoreTexts();
 
-        private void HandleMultiplierChanged(int multiplier) => RefreshMultiplierText();
-
         private void HandleStateChanged(GameState state) => RefreshVisibility();
 
         private void RefreshScoreTexts()
@@ -117,30 +106,6 @@ namespace YesChef.UI
             if (_highScoreText != null)
             {
                 _highScoreText.text = ScoreManager.Instance.HighScore.ToString();
-            }
-        }
-
-        private void RefreshMultiplierText()
-        {
-            if (_multiplierText == null || ScoreManager.Instance == null)
-            {
-                return;
-            }
-
-            int multiplier = ScoreManager.Instance.Multiplier;
-            _multiplierText.text = $"x{multiplier}";
-
-            if (multiplier <= ComboTracker.MinMultiplier)
-            {
-                _multiplierText.color = _idleMultiplierColor;
-            }
-            else if (multiplier >= ScoreManager.Instance.MaxMultiplier)
-            {
-                _multiplierText.color = _maxMultiplierColor;
-            }
-            else
-            {
-                _multiplierText.color = _activeMultiplierColor;
             }
         }
 

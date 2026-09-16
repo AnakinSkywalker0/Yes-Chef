@@ -23,14 +23,9 @@ the fridges), and hand them over before the order goes stale.
 | Cheese | None — deliver as-is | 10 |
 | Meat | Cook on a stove (6s) | 30 |
 
-An order is worth **the sum of its ingredient values**. Customers wait patiently for a
-**25-second grace period**; after that the order loses **one point per whole second** it
-stays open (time is floored, so 14.99 overdue seconds only cost 14 points) and a slow order
-can finish negative. Windows refill five seconds after being cleared.
-
-Deliver inside the grace period to build a **combo**: the first on-time order pays x1, the
-next x2, then x3 (the cap). One late delivery drops the multiplier straight back to x1, and
-that late order is never multiplied - so a penalty is never made worse by a streak.
+An order scores **the sum of its ingredient values minus one point per whole second it has
+been open**. Time is floored, so a 14.99-second delivery only costs 14 points, and a slow
+order can finish negative. Windows refill five seconds after being cleared.
 
 ### Controls
 
@@ -39,10 +34,6 @@ that late order is never multiplied - so a penalty is never made worse by a stre
 | `W A S D` / arrow keys | Left stick / d-pad | Move |
 | `E` or `Space` | South button | Use the station you are facing |
 | `Esc` | Start | Pause |
-
-On phones and tablets a virtual stick and a **USE** button appear during service. They are
-Input System on-screen controls that emulate a gamepad, so the gamepad bindings above drive
-them and no gameplay code knows the input came from a thumb.
 
 The briefing screen renders these straight from the bound Input System actions, so
 rebinding `Assets/_Project/Input/KitchenControls.inputactions` updates the UI automatically.
@@ -75,8 +66,7 @@ Assets/_Project/
 │   ├── Stations/      BaseStation, the five station types, PreparationTimer,
 │   │                  StationSelectedVisual, StationFeedbackVisual
 │   ├── Orders/        Order, OrderGenerator (plain C#), OrderBoard
-│   ├── Scoring/       ScoreManager, ComboTracker + ScoreAward (plain C#),
-│   │                  IHighScoreRepository, PlayerPrefsHighScoreRepository
+│   ├── Scoring/       ScoreManager, IHighScoreRepository, PlayerPrefsHighScoreRepository
 │   └── UI/            Main menu + briefing, HUD, pause, game over,
 │                      world-space tickets and progress bars, controls list
 ├── Tests/EditMode/    54 tests: scoring, order generation, the preparation timer,
@@ -123,6 +113,13 @@ live ingredients, and each station's tests drive `Interact` directly.
 **Pausing is one line.** `GameManager` is the only object that touches `Time.timeScale`.
 Every gameplay timer runs on `Time.deltaTime`, so freezing the timescale pauses cooking,
 chopping and order ages simultaneously with no per-system pause handling.
+
+**Scoring follows the brief to the letter.** A grace period and a combo multiplier were
+prototyped and removed: they made rounds feel better but broke the brief's worked example
+(cheese + meat in 14 s = 26), and a rule a reviewer can verify by hand beats one they have to
+take on trust. Round length, respawn delay and ingredient values are inspector data
+(`GameManager`, `OrderBoard`, `IngredientSO`); the penalty and order-size rules live in the
+plain-C# `Order` and `OrderGenerator`, where the tests pin them down.
 
 **High score persists behind an interface.** `ScoreManager` depends on
 `IHighScoreRepository`, not on PlayerPrefs. It commits at the end of a round rather than
@@ -198,8 +195,9 @@ is the unambiguous, leak-free interpretation.
 
 ## Scope
 
-Per the brief, there is no sound. Art is primitives, colour and generated sprites — enough
-to read the game state at a glance. Only Unity registry packages are used (URP, Input
+Per the brief, there is no sound. Art is primitives with procedurally generated textures,
+generated sprites and a URP post-processing volume — enough to read the game state at a
+glance. Only Unity registry packages are used (URP, Input
 System, Cinemachine, TextMeshPro, Test Framework); there are no third-party plug-ins.
 
 ## Tests

@@ -1,6 +1,6 @@
 using Unity.Cinemachine;
 using UnityEngine;
-using YesChef.Scoring;
+using YesChef.Orders;
 using YesChef.Stations;
 
 namespace YesChef.Core
@@ -14,6 +14,7 @@ namespace YesChef.Core
     [RequireComponent(typeof(CinemachineImpulseSource))]
     public class OrderImpulseFeedback : MonoBehaviour
     {
+        [SerializeField] private OrderBoard _orderBoard;
         [SerializeField, Min(0f)] private float _positiveForce = 0.45f;
         [SerializeField, Min(0f)] private float _negativeForce = 0.9f;
 
@@ -21,30 +22,30 @@ namespace YesChef.Core
 
         private void Awake() => _impulseSource = GetComponent<CinemachineImpulseSource>();
 
-        private void Start()
+        private void OnEnable()
         {
-            if (ScoreManager.Instance != null)
+            if (_orderBoard != null)
             {
-                ScoreManager.Instance.OnOrderAwarded += HandleOrderAwarded;
+                _orderBoard.OnOrderScored += HandleOrderScored;
             }
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
-            if (ScoreManager.Instance != null)
+            if (_orderBoard != null)
             {
-                ScoreManager.Instance.OnOrderAwarded -= HandleOrderAwarded;
+                _orderBoard.OnOrderScored -= HandleOrderScored;
             }
         }
 
-        private void HandleOrderAwarded(CustomerWindowStation window, ScoreAward award)
+        private void HandleOrderScored(CustomerWindowStation window, int points)
         {
             if (_impulseSource == null)
             {
                 return;
             }
 
-            _impulseSource.GenerateImpulseWithForce(award.Points >= 0 ? _positiveForce : _negativeForce);
+            _impulseSource.GenerateImpulseWithForce(points >= 0 ? _positiveForce : _negativeForce);
         }
     }
 }
