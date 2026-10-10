@@ -34,6 +34,7 @@ namespace YesChef.UI
 
             if (_quitButton != null)
             {
+                _quitButton.gameObject.SetActive(GameManager.CanQuit);
                 _quitButton.onClick.AddListener(HandleQuitClicked);
             }
 

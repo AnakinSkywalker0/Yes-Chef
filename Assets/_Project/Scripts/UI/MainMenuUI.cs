@@ -37,6 +37,11 @@ namespace YesChef.UI
             Bind(_startServiceButton, HandleStartServiceClicked);
             Bind(_backButton, ShowMenu);
 
+            if (_quitButton != null)
+            {
+                _quitButton.gameObject.SetActive(GameManager.CanQuit);
+            }
+
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.OnStateChanged += HandleStateChanged;
