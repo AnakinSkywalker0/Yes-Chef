@@ -153,6 +153,9 @@ namespace YesChef.Core
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
+        /// <summary>False in the browser, where Application.Quit does nothing - quit buttons hide themselves.</summary>
+        public static bool CanQuit => Application.platform != RuntimePlatform.WebGLPlayer;
+
         public void QuitGame()
         {
             Time.timeScale = 1f;
