@@ -65,7 +65,7 @@ namespace YesChef.UI
             {
                 string part = parts[i].Trim();
                 allSingleKeys &= part.Length == 1;
-                allArrows &= part is "Up" or "Down" or "Left" or "Right";
+                allArrows &= IsArrowKey(part);
             }
 
             if (allSingleKeys)
@@ -79,6 +79,18 @@ namespace YesChef.UI
             }
 
             yield return allArrows ? ArrowKeysLabel : string.Join(" / ", parts).Trim();
+        }
+
+        /// <summary>Input System 1.18 names the arrows "Up"; 1.20 names them "Up Arrow".</summary>
+        private static bool IsArrowKey(string part)
+        {
+            const string suffix = " Arrow";
+            if (part.EndsWith(suffix))
+            {
+                part = part.Substring(0, part.Length - suffix.Length);
+            }
+
+            return part is "Up" or "Down" or "Left" or "Right";
         }
 
         private GameObject Clone(GameObject template)
