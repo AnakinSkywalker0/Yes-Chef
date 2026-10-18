@@ -13,6 +13,12 @@ namespace YesChef.Characters
         [SerializeField] private PlayerController _player;
         [SerializeField] private Transform _bodyRoot;
 
+        [Tooltip("Optional. When set, the rig's Idle/Walk/Carry clips replace the procedural bob.")]
+        [SerializeField] private Animator _animator;
+
+        private static readonly int MovingHash = Animator.StringToHash("Moving");
+        private static readonly int CarryingHash = Animator.StringToHash("Carrying");
+
         [Header("Bob")]
         [SerializeField, Min(0f)] private float _bobFrequency = 9f;
         [SerializeField, Min(0f)] private float _bobHeight = 0.07f;
@@ -36,6 +42,13 @@ namespace YesChef.Characters
 
         private void LateUpdate()
         {
+            if (_player != null && _animator != null)
+            {
+                _animator.SetBool(MovingHash, _player.IsMoving);
+                _animator.SetBool(CarryingHash, _player.HasIngredient);
+                return;
+            }
+
             if (_player == null || _bodyRoot == null)
             {
                 return;

@@ -109,10 +109,23 @@ namespace YesChef.Controls
             }
         }
 
-        /// <summary>One human-readable label per binding, composites collapsed (e.g. "W/A/S/D", "Left Stick").</summary>
-        public IReadOnlyList<string> GetMoveBindingLabels() => GetBindingLabels(_moveAction);
-        public IReadOnlyList<string> GetInteractBindingLabels() => GetBindingLabels(_interactAction);
-        public IReadOnlyList<string> GetPauseBindingLabels() => GetBindingLabels(_pauseAction);
+        /// <summary>One entry per binding, composites collapsed (e.g. "W/A/S/D", "Left Stick").</summary>
+        /// <summary>A binding's display text plus whether it comes from a gamepad (vs keyboard).</summary>
+        public readonly struct BindingLabel
+        {
+            public BindingLabel(string text, bool isGamepad)
+            {
+                Text = text;
+                IsGamepad = isGamepad;
+            }
+
+            public string Text { get; }
+            public bool IsGamepad { get; }
+        }
+
+        public IReadOnlyList<BindingLabel> GetMoveBindings() => GetBindings(_moveAction);
+        public IReadOnlyList<BindingLabel> GetInteractBindings() => GetBindings(_interactAction);
+        public IReadOnlyList<BindingLabel> GetPauseBindings() => GetBindings(_pauseAction);
 
         public string GetMoveDisplayString() => GetDisplayString(_moveAction);
         public string GetInteractDisplayString() => GetDisplayString(_interactAction);
@@ -125,31 +138,45 @@ namespace YesChef.Controls
         private static string GetDisplayString(InputAction action) =>
             action == null ? "-" : action.GetBindingDisplayString();
 
-        private static IReadOnlyList<string> GetBindingLabels(InputAction action)
+        private static IReadOnlyList<BindingLabel> GetBindings(InputAction action)
         {
-            var labels = new List<string>();
+            var result = new List<BindingLabel>();
             if (action == null)
             {
-                return labels;
+                return result;
             }
 
             var bindings = action.bindings;
             for (int i = 0; i < bindings.Count; i++)
             {
-                // Composite parts are folded into their parent's display string.
                 if (bindings[i].isPartOfComposite)
                 {
                     continue;
                 }
 
                 string label = action.GetBindingDisplayString(i);
-                if (!string.IsNullOrWhiteSpace(label))
+                if (string.IsNullOrWhiteSpace(label))
                 {
-                    labels.Add(label);
+                    continue;
                 }
+
+                // A composite has no device of its own; its first part decides.
+                string path = bindings[i].effectivePath;
+                if (bindings[i].isComposite && i + 1 < bindings.Count)
+                {
+                    path = bindings[i + 1].effectivePath;
+                }
+
+                result.Add(new BindingLabel(label, IsGamepadPath(path)));
             }
 
-            return labels;
+            return result;
+        }
+
+        private static bool IsGamepadPath(string path)
+        {
+            string layout = InputControlPath.TryGetDeviceLayout(path);
+            return !string.IsNullOrEmpty(layout) && InputSystem.IsFirstLayoutBasedOnSecond(layout, "Gamepad");
         }
     }
 }

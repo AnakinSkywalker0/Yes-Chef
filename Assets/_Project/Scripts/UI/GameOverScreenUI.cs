@@ -20,6 +20,12 @@ namespace YesChef.UI
         [SerializeField] private Button _restartButton;
         [SerializeField] private Button _quitButton;
 
+        [Header("Rating")]
+        [SerializeField] private TMP_Text _headlineText;
+        [SerializeField] private StarRatingUI _stars;
+
+        private static readonly string[] Headlines = { "Rough shift", "Not bad!", "Nice shift!", "Michelin star!" };
+
         private void Start()
         {
             if (_restartButton != null)
@@ -92,6 +98,15 @@ namespace YesChef.UI
             if (_newHighScoreBanner != null)
             {
                 _newHighScoreBanner.SetActive(score.HasNewHighScore);
+            }
+
+            if (_stars != null)
+            {
+                _stars.Refresh();
+                if (_headlineText != null)
+                {
+                    _headlineText.text = Headlines[Mathf.Clamp(_stars.Stars, 0, Headlines.Length - 1)];
+                }
             }
         }
 

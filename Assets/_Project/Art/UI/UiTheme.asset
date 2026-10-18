@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa356b38cf560e441bc2864d6ff80b11, type: 3}
+  m_Name: UiTheme
+  m_EditorClassIdentifier: YesChef.Runtime::YesChef.UI.UiTheme
+  DisplayFont: {fileID: 11400000, guid: 45dbcdb2f84cf2d41a2c9f77e05c46fb, type: 2}
+  BodyFont: {fileID: 11400000, guid: 57aa525105fc15747b99f3e92c65e343, type: 2}
+  Rounded: {fileID: 21300000, guid: d4edf4036fc048b4081de064942c91f9, type: 3}
+  Circle: {fileID: 21300000, guid: 7be7a6931ac65fb4ab30796982e045d2, type: 3}
+  Gradient: {fileID: 21300000, guid: 7d4ffb14539b3cb4ba82298b56519906, type: 3}
+  Vegetable: {fileID: 21300000, guid: 807136b971dfb1949a4b278f8c181131, type: 3}
+  Cheese: {fileID: 21300000, guid: 6e05f3bfcae3c034fa3ddd2b8bf4b183, type: 3}
+  Meat: {fileID: 21300000, guid: 809622f40ca617d4abed65afab0eb667, type: 3}
+  Bell: {fileID: 21300000, guid: 23587ee5b1869a8449367e3f522df275, type: 3}
+  Knife: {fileID: 21300000, guid: d5a40c869640d93458c30b8c67f92d4d, type: 3}
+  Fridge: {fileID: 21300000, guid: 2a8f3fa74e155964cbc56a29b4c5e165, type: 3}
+  Flame: {fileID: 21300000, guid: 088f649b6cc014549a1cf85b701e35fa, type: 3}
+  Star: {fileID: 21300000, guid: 37770b8ddbac6574ba12aa7c0555a48d, type: 3}
+  Play: {fileID: 21300000, guid: 5fa5435b6c00035428ae882456fb0c1a, type: 3}
+  Check: {fileID: 21300000, guid: 0940cc1b79b069a40bb119536123660c, type: 3}
