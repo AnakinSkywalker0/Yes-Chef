@@ -65,7 +65,7 @@ namespace YesChef.Stations
         {
             for (int i = 0; i < _slots.Count; i++)
             {
-                if (_slots[i] != null && _slots[i].IsEmpty)
+                if (_slots[i] != null && !_slots[i].IsCooking)
                 {
                     return _slots[i];
                 }
